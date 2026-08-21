@@ -146,20 +146,20 @@ export class TmdbService {
    * any non-2xx response (401→Unauthorized, 404→NotFound, 429→RateLimited,
    * 5xx→ServiceUnavailable), so the caller doesn't re-check `response.ok`.
    */
-  private fetch<T>(path: string, ctx: Context | RequestContext, qs?: URLSearchParams): Promise<T> {
+  private fetch<T>(
+    path: string,
+    ctx: Context | RequestContext,
+    qs?: URLSearchParams,
+    options?: { expectedStatuses?: number[] },
+  ): Promise<T> {
     const url = qs && qs.size > 0 ? `${BASE_URL}${path}?${qs.toString()}` : `${BASE_URL}${path}`;
-    /**
-     * `fetchWithTimeout`/`withRetry` accept `RequestContext` (index-signature
-     * shape). A handler `Context` is structurally compatible at runtime — cast
-     * is safe per framework docs. `signal` is only present on a handler Context.
-     */
-    // biome-ignore lint/suspicious/noExplicitAny: RequestContext compatibility, safe per framework docs
-    const rCtx = ctx as any;
-    const signal: AbortSignal | undefined = 'signal' in ctx ? (ctx as Context).signal : undefined;
+    // A handler Context extends RequestContext (framework ≥0.12) — passes directly.
+    const signal: AbortSignal | undefined = 'signal' in ctx ? ctx.signal : undefined;
     return withRetry(
       async () => {
-        const response = await fetchWithTimeout(url, TIMEOUT_MS, rCtx, {
+        const response = await fetchWithTimeout(url, TIMEOUT_MS, ctx, {
           headers: this.headers(),
+          ...(options?.expectedStatuses ? { expectedStatuses: options.expectedStatuses } : {}),
           ...(signal ? { signal } : {}),
         });
         const text = await response.text();
@@ -170,7 +170,7 @@ export class TmdbService {
       },
       {
         operation: 'Tmdb.fetch',
-        context: rCtx,
+        context: ctx,
         baseDelayMs: 500,
         ...(signal ? { signal } : {}),
       },
@@ -822,7 +822,9 @@ export class TmdbService {
     id: number,
   ): Promise<T> {
     try {
-      return await this.fetch<T>(path, ctx, qs);
+      // A 404 is the only resource-not-found signal TMDB gives here — expected
+      // outcome, so fetchWithTimeout logs it at debug before the re-throw below.
+      return await this.fetch<T>(path, ctx, qs, { expectedStatuses: [404] });
     } catch (err) {
       if (isNotFound(err)) {
         throw notFound(notFoundMessage(kind, id), {

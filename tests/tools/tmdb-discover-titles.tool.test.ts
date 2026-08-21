@@ -75,7 +75,7 @@ describe('tmdbDiscoverTitles', () => {
       with_watch_providers: [8],
     });
     await expect(tmdbDiscoverTitles.handler(input, ctx)).rejects.toMatchObject({
-      code: JsonRpcErrorCode.InvalidParams,
+      code: JsonRpcErrorCode.ValidationError,
       data: { reason: 'region_required' },
     });
   });

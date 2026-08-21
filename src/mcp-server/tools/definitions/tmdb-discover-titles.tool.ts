@@ -161,7 +161,7 @@ export const tmdbDiscoverTitles = tool('tmdb_discover_titles', {
   errors: [
     {
       reason: 'region_required',
-      code: JsonRpcErrorCode.InvalidParams,
+      code: JsonRpcErrorCode.ValidationError,
       when: 'with_watch_providers is set without a watch_region.',
       recovery:
         'Provide watch_region (ISO 3166-1, e.g. "US") — streaming availability is region-specific and cannot be queried globally.',

@@ -49,7 +49,7 @@ describe('tmdb resources', () => {
       errors: tmdbMovieResource.errors,
       uri: new URL('tmdb://movie/550'),
     });
-    const params = tmdbMovieResource.params.parse({ movie_id: '550' });
+    const params = tmdbMovieResource.params!.parse({ movie_id: '550' });
     const movie = await tmdbMovieResource.handler(params, ctx);
     expect(movie).toMatchObject({ id: 550, title: 'Fight Club' });
   });
@@ -72,7 +72,7 @@ describe('tmdb resources', () => {
       errors: tmdbTvResource.errors,
       uri: new URL('tmdb://tv/1396'),
     });
-    const params = tmdbTvResource.params.parse({ series_id: '1396' });
+    const params = tmdbTvResource.params!.parse({ series_id: '1396' });
     const show = await tmdbTvResource.handler(params, ctx);
     expect(show).toMatchObject({ id: 1396, name: 'Breaking Bad' });
   });
@@ -90,7 +90,7 @@ describe('tmdb resources', () => {
       errors: tmdbPersonResource.errors,
       uri: new URL('tmdb://person/287'),
     });
-    const params = tmdbPersonResource.params.parse({ person_id: '287' });
+    const params = tmdbPersonResource.params!.parse({ person_id: '287' });
     const person = await tmdbPersonResource.handler(params, ctx);
     expect(person).toMatchObject({ id: 287, name: 'Brad Pitt' });
   });
@@ -102,7 +102,7 @@ describe('tmdb resources', () => {
       errors: tmdbMovieResource.errors,
       uri: new URL('tmdb://movie/99999999'),
     });
-    const params = tmdbMovieResource.params.parse({ movie_id: '99999999' });
+    const params = tmdbMovieResource.params!.parse({ movie_id: '99999999' });
     await expect(tmdbMovieResource.handler(params, ctx)).rejects.toMatchObject({
       code: JsonRpcErrorCode.NotFound,
       data: { reason: 'movie_not_found' },
