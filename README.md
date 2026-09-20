@@ -7,7 +7,7 @@
 
 <div align="center">
 
-[![Version](https://img.shields.io/badge/Version-0.1.2-blue.svg?style=flat-square)](./CHANGELOG.md) [![License](https://img.shields.io/badge/License-Apache%202.0-orange.svg?style=flat-square)](./LICENSE) [![Docker](https://img.shields.io/badge/Docker-ghcr.io-2496ED?style=flat-square&logo=docker&logoColor=white)](https://github.com/users/cyanheads/packages/container/package/tmdb-mcp-server) [![MCP SDK](https://img.shields.io/badge/MCP%20SDK-^2.0.0-green.svg?style=flat-square)](https://modelcontextprotocol.io/) [![npm](https://img.shields.io/npm/v/@cyanheads/tmdb-mcp-server?style=flat-square&logo=npm&logoColor=white)](https://www.npmjs.com/package/@cyanheads/tmdb-mcp-server) [![TypeScript](https://img.shields.io/badge/TypeScript-^7.0.2-3178C6.svg?style=flat-square)](https://www.typescriptlang.org/) [![Bun](https://img.shields.io/badge/Bun-v1.3.0%2B-blueviolet.svg?style=flat-square)](https://bun.sh/)
+[![Version](https://img.shields.io/badge/Version-0.1.2-blue.svg?style=flat-square)](./CHANGELOG.md) [![License](https://img.shields.io/badge/License-Apache%202.0-orange.svg?style=flat-square)](./LICENSE) [![Docker](https://img.shields.io/badge/Docker-ghcr.io-2496ED?style=flat-square&logo=docker&logoColor=white)](https://github.com/users/cyanheads/packages/container/package/tmdb-mcp-server) [![MCP SDK](https://img.shields.io/badge/MCP%20SDK-^2.0.0-green.svg?style=flat-square)](https://modelcontextprotocol.io/) [![npm](https://img.shields.io/npm/v/@cyanheads/tmdb-mcp-server?style=flat-square&logo=npm&logoColor=white)](https://www.npmjs.com/package/@cyanheads/tmdb-mcp-server) [![TypeScript](https://img.shields.io/badge/TypeScript-^7.0.2-3178C6.svg?style=flat-square)](https://www.typescriptlang.org/) [![Bun](https://img.shields.io/badge/Bun-v1.4.0%2B-blueviolet.svg?style=flat-square)](https://bun.sh/)
 
 </div>
 
@@ -21,9 +21,11 @@
 
 ---
 
-## Tools
+## Overview
 
-Eight tools organized search-before-detail — `tmdb_search_titles` resolves a name to an integer id, the `get_*` tools fetch full records, and `tmdb_discover_titles` / `tmdb_get_trending` / `tmdb_get_watch_providers` cover filtered browsing and streaming availability. TMDB keys on integer ids, not titles, so search comes first.
+Movie and TV metadata powered by The Movie Database (TMDB). Search titles and people by name, pull full credits and filmographies, discover titles by filtered criteria, track trending content, and check region-aware streaming availability from any MCP client. Runs as a stdio process or a local Streamable HTTP server.
+
+### Tools
 
 | Tool | Description |
 |:---|:---|
@@ -36,11 +38,19 @@ Eight tools organized search-before-detail — `tmdb_search_titles` resolves a n
 | `tmdb_get_trending` | Trending movies, TV, or people for the day or week. |
 | `tmdb_get_watch_providers` | Region-scoped streaming availability (JustWatch) — flatrate/rent/buy/ads/free provider lists plus the TMDB link. A region code is required. |
 
-All list and detail responses resolve image `*_path` fields to full `https://image.tmdb.org/t/p/…` URLs and resolve `genre_ids[]` to genre names. Every tool carries the TMDB attribution in its output enrichment.
+### Resources
 
-### `tmdb_search_titles`
+| Resource | Description |
+|:---|:---|
+| `tmdb://movie/{movie_id}` | Movie detail by id, as injectable context — the same enriched record as `tmdb_get_movie`. |
+| `tmdb://tv/{series_id}` | Show detail by id — the same enriched record as `tmdb_get_show`. |
+| `tmdb://person/{person_id}` | Person detail and filmography by id — the same record as `tmdb_get_person`. |
 
-Resolve a movie, show, or person name to ranked results with integer ids.
+All resource data is also reachable via tools — the three resources are convenience wrappers over the detail service methods, so tool-only clients lose nothing.
+
+## Capability reference
+
+### `tmdb_search_titles` <sub>tool</sub>
 
 - `multi` mode (default) mixes movies, shows, and people, each result tagged with `media_type`; `movie`/`tv`/`person` restrict to one type and enable type-specific ranking
 - Optional `year` filter (movie/tv modes), `language` override, `include_adult` toggle, and `page` for paging past the first 20
@@ -49,9 +59,7 @@ Resolve a movie, show, or person name to ranked results with integer ids.
 
 ---
 
-### `tmdb_get_movie`
-
-Fetch full movie detail by TMDB id in a single request.
+### `tmdb_get_movie` <sub>tool</sub>
 
 - Folds credits, videos, recommendations, similar, keywords, external ids, and release dates into one call via `append_to_response` — trim the `append` array to shrink the payload (e.g. `["credits"]` for cast only)
 - US theatrical certification extracted from the `release_dates` namespace; top-billed cast and key crew (Director/Writer/Screenplay/Producer); YouTube trailers with watch URLs
@@ -59,19 +67,15 @@ Fetch full movie detail by TMDB id in a single request.
 
 ---
 
-### `tmdb_get_show`
+### `tmdb_get_show` <sub>tool</sub>
 
-Fetch full TV show detail by series id — the series mirror of `tmdb_get_movie`.
-
-- Same `append_to_response` set, with `content_ratings` (US TV rating) in place of `release_dates`
+- Same `append_to_response` set as `tmdb_get_movie`, with `content_ratings` (US TV rating) in place of `release_dates`
 - Adds season summaries, creators, networks, and the last/next episode to air
 - Pass a `season_number` from `seasons[]` to `tmdb_get_season` for the episode list
 
 ---
 
-### `tmdb_get_season`
-
-Fetch the episode list for one season of a show — bridges the show-level summary and per-episode detail.
+### `tmdb_get_season` <sub>tool</sub>
 
 - Per-episode names, air dates, runtimes, vote averages, still URLs, and guest stars (embedded per episode)
 - Plus the season's regular recurring cast (distinct from per-episode guest stars)
@@ -79,19 +83,15 @@ Fetch the episode list for one season of a show — bridges the show-level summa
 
 ---
 
-### `tmdb_get_person`
-
-Fetch person detail and the full combined filmography.
+### `tmdb_get_person` <sub>tool</sub>
 
 - Biography, birth/death dates, place of birth, known-for department, aliases, gender label
-- `combined_credits` split into `cast_credits` and `crew_credits`, recency-ordered (most recent first) and capped to a display size — the pre-cap totals are reported and truncation is disclosed in the enrichment
+- `combined_credits` split into `cast_credits` and `crew_credits`, recency-ordered (most recent first) and capped to 50 per list — the pre-cap totals are reported and truncation is disclosed in the enrichment
 - IMDb id plus the extended cross-platform id set (Wikidata, social handles) for chaining to other servers
 
 ---
 
-### `tmdb_discover_titles`
-
-The power-query — filtered, sorted discovery across movies or TV.
+### `tmdb_discover_titles` <sub>tool</sub>
 
 - Filter by `with_genres`/`without_genres`, exact `year` or a `release_date_gte`/`lte` window, `vote_average` range, `vote_count_gte` floor, `with_cast`/`with_crew` (movie), `with_networks` (tv), `with_watch_providers` + `watch_region`, `with_original_language`, and `runtime` range
 - Sort by popularity, revenue, vote average, vote count, or release date. Pair `vote_average.desc` with `vote_count_gte` (~100–1000) so a 10.0-from-3-votes title does not dominate
@@ -100,36 +100,49 @@ The power-query — filtered, sorted discovery across movies or TV.
 
 ---
 
-### `tmdb_get_watch_providers`
+### `tmdb_get_trending` <sub>tool</sub>
 
-Find where a movie or TV title streams in one region.
+- `media_type`: `all` (default) mixes movies, shows, and people, each tagged with `media_type`; or restrict to one type
+- `time_window`: `day` (more volatile) or `week` (default, steadier)
+- Results are the same ranked summary cards as search and discover, up to 20 per page, with `page` for paging
+- An empty result set returns with recovery guidance, not an error
+
+---
+
+### `tmdb_get_watch_providers` <sub>tool</sub>
 
 - Returns flatrate (subscription), rent, buy, ads (ad-supported free), and free provider lists with logo URLs, plus the TMDB JustWatch-backed `link` — the supported path to actual deep links
 - A `watch_region` (ISO 3166-1 alpha-2) is required: availability is region-specific and there is no global answer; the response always carries a region caveat
 - An empty result for a region is a valid "not available to stream here" answer, not an error
 - Provider ids in the result feed back into `tmdb_discover_titles` `with_watch_providers`
 
-## Resources
+---
 
-| Type | Name | Description |
-|:---|:---|:---|
-| Resource | `tmdb://movie/{movie_id}` | Movie detail by id, as injectable context — the same enriched record as `tmdb_get_movie`. |
-| Resource | `tmdb://tv/{series_id}` | Show detail by id — the same enriched record as `tmdb_get_show`. |
-| Resource | `tmdb://person/{person_id}` | Person detail and filmography by id — the same record as `tmdb_get_person`. |
+### `tmdb://movie/{movie_id}` <sub>resource</sub>
 
-All resource data is also reachable via tools — the three resources are convenience wrappers over the detail service methods, so tool-only clients lose nothing. Search, discovery, trending, and seasons are query paths or intermediate records, not addressable entities, so they have no resources. There are no prompts: this is a data/lookup server with no recurring multi-step interaction template.
+- Same enriched record as `tmdb_get_movie`, with the full `append_to_response` set — `application/json`
+- `movie_id` comes from `tmdb_search_titles` or `tmdb_discover_titles`
+- Typed `movie_not_found` error when TMDB returns 404 for the id
+
+---
+
+### `tmdb://tv/{series_id}` <sub>resource</sub>
+
+- Same enriched record as `tmdb_get_show`, with the full `append_to_response` set — `application/json`
+- `series_id` comes from `tmdb_search_titles` or `tmdb_discover_titles`
+- Typed `show_not_found` error when TMDB returns 404 for the id
+
+---
+
+### `tmdb://person/{person_id}` <sub>resource</sub>
+
+- Same enriched record as `tmdb_get_person` — `application/json`
+- `person_id` comes from `tmdb_search_titles` (mode "person")
+- Typed `person_not_found` error when TMDB returns 404 for the id
 
 ## Features
 
-Built on [`@cyanheads/mcp-ts-core`](https://www.npmjs.com/package/@cyanheads/mcp-ts-core):
-
-- Declarative tool and resource definitions — single file per primitive, framework handles registration and validation
-- Unified error handling — handlers throw, framework catches, classifies, and formats
-- Typed error contracts — every tool declares its failure reasons with recovery guidance for the agent
-- Pluggable auth: `none`, `jwt`, `oauth`
-- Swappable storage backends: `in-memory`, `filesystem`, `Supabase`, `Cloudflare KV/R2/D1`
-- Structured logging with optional OpenTelemetry tracing
-- STDIO and Streamable HTTP transports — runs locally or on Cloudflare Workers from the same codebase
+Built on [`@cyanheads/mcp-ts-core`](https://github.com/cyanheads/mcp-ts-core): stdio and Streamable HTTP transports, pluggable auth (`none` / `jwt` / `oauth`), swappable storage (`in-memory`, `filesystem`, `Supabase`, `Cloudflare KV/R2/D1`), structured logging with optional OpenTelemetry tracing.
 
 TMDB-specific:
 
@@ -218,7 +231,7 @@ Refer to "your MCP client configuration file" generically — different clients 
 
 ### Prerequisites
 
-- [Bun v1.3.0](https://bun.sh/) or higher (or Node.js v24+).
+- [Bun v1.4.0](https://bun.sh/) or higher (or Node.js v24+).
 - A TMDB **API Read Access Token** (v4 JWT) — free from your [TMDB API settings](https://www.themoviedb.org/settings/api).
 
 ### Installation
@@ -319,9 +332,13 @@ See [`AGENTS.md`](./AGENTS.md) (or [`CLAUDE.md`](./CLAUDE.md), the same content)
 - Register new tools and resources via the barrels in `src/mcp-server/*/definitions/index.ts`
 - Wrap the TMDB API: validate raw → normalize to the domain type → return the output schema; never fabricate missing fields (null poster paths omit the URL, unknown genre ids are dropped)
 
+## Attribution
+
+<img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg" alt="TMDB" height="20"> This product uses the TMDB API but is not endorsed or certified by TMDB. Streaming availability data is provided by JustWatch via TMDB and is region-specific.
+
 ## Contributing
 
-Issues and pull requests are welcome. Run checks and tests before submitting:
+Issues are welcome. Run checks and tests before submitting:
 
 ```sh
 bun run devcheck
@@ -331,7 +348,3 @@ bun run test
 ## License
 
 Apache-2.0 — see [LICENSE](LICENSE) for details.
-
----
-
-<img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg" alt="TMDB" height="20"> This product uses the TMDB API but is not endorsed or certified by TMDB. Streaming availability data is provided by JustWatch via TMDB and is region-specific.
