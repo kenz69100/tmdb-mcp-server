@@ -39,6 +39,7 @@ export const tmdbTvResource = resource('tmdb://tv/{series_id}', {
       when: 'TMDB returns 404 for the given series id.',
       recovery:
         'Verify the id with tmdb_search_titles (mode "tv") — TMDB keys on integer ids, not titles.',
+      thrownBy: 'service',
     },
   ],
 

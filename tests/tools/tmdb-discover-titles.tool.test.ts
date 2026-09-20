@@ -80,6 +80,28 @@ describe('tmdbDiscoverTitles', () => {
     });
   });
 
+  it('puts the contract recovery on the wire for region_required', async () => {
+    /**
+     * Declaring `recovery` is not the same as sending it: the throw site has to forward
+     * the resolver, and the framework mirrors `data.recovery.hint` into the error
+     * `content[]`. Pinning it against the contract entry keeps the two from drifting and
+     * catches a throw site that drops the resolver.
+     */
+    await initServiceForTools();
+    const declared = tmdbDiscoverTitles.errors?.find((e) => e.reason === 'region_required');
+    expect(declared?.recovery).toBeTypeOf('string');
+
+    const ctx = createMockContext({ errors: tmdbDiscoverTitles.errors });
+    const input = tmdbDiscoverTitles.input.parse({
+      media_type: 'tv',
+      with_watch_providers: [8],
+      watch_region: '',
+    });
+    await expect(tmdbDiscoverTitles.handler(input, ctx)).rejects.toMatchObject({
+      data: { reason: 'region_required', recovery: { hint: declared?.recovery } },
+    });
+  });
+
   it('notices that with_networks is ignored for movie', async () => {
     await initServiceForTools({
       '/discover/movie': {

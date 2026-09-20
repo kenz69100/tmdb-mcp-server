@@ -133,6 +133,7 @@ export const tmdbGetMovie = tool('tmdb_get_movie', {
       when: 'TMDB returns 404 for the given movie id.',
       recovery:
         'Verify the id with tmdb_search_titles (mode "movie") — TMDB keys on integer ids, not titles.',
+      thrownBy: 'service',
     },
   ],
 

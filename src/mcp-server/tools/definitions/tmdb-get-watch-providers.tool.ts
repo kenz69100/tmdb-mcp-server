@@ -57,6 +57,7 @@ export const tmdbGetWatchProviders = tool('tmdb_get_watch_providers', {
       when: 'TMDB returns 404 for the given id + media_type.',
       recovery:
         'Verify the id and that media_type matches it (a movie id is not a tv id) via tmdb_search_titles.',
+      thrownBy: 'service',
     },
   ],
 

@@ -88,6 +88,7 @@ export const tmdbGetSeason = tool('tmdb_get_season', {
       when: 'TMDB returns 404 — the series id is wrong or the season number does not exist for this show.',
       recovery:
         'Confirm the series id and list valid season numbers with tmdb_get_show (seasons[].season_number) before retrying.',
+      thrownBy: 'service',
     },
   ],
 

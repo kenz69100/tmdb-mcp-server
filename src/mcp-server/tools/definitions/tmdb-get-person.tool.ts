@@ -105,6 +105,7 @@ export const tmdbGetPerson = tool('tmdb_get_person', {
       code: JsonRpcErrorCode.NotFound,
       when: 'TMDB returns 404 for the given person id.',
       recovery: 'Verify the id with tmdb_search_titles (mode "person").',
+      thrownBy: 'service',
     },
   ],
 

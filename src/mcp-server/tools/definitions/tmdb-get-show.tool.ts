@@ -195,6 +195,7 @@ export const tmdbGetShow = tool('tmdb_get_show', {
       when: 'TMDB returns 404 for the given series id.',
       recovery:
         'Verify the id with tmdb_search_titles (mode "tv") — TMDB keys on integer ids, not titles.',
+      thrownBy: 'service',
     },
   ],
 

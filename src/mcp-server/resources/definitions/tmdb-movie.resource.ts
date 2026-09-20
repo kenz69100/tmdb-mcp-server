@@ -39,6 +39,7 @@ export const tmdbMovieResource = resource('tmdb://movie/{movie_id}', {
       when: 'TMDB returns 404 for the given movie id.',
       recovery:
         'Verify the id with tmdb_search_titles (mode "movie") — TMDB keys on integer ids, not titles.',
+      thrownBy: 'service',
     },
   ],
 
