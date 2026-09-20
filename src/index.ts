@@ -20,9 +20,18 @@ const INSTRUCTIONS =
   'pass a country code; results never imply global availability. Image fields are returned as full URLs. ' +
   'This product uses the TMDB API but is not endorsed or certified by TMDB.';
 
-await createApp({
+/** Lifecycle handle for embedders and integration tests; running as a CLI ignores it. */
+export const app = await createApp({
   name: 'tmdb-mcp-server',
   title: 'tmdb-mcp-server',
+  /**
+   * Every tool and resource here is a read-only TMDB lookup — nothing suspends on
+   * `ctx.requestInput` and nothing is kept per session, so there is no session store to
+   * earn. Declaring the posture in code rather than leaving it to `MCP_SESSION_MODE` puts
+   * a `bunx` or from-source run on the same footing as the container, which has set
+   * stateless all along.
+   */
+  sessionMode: 'stateless',
   instructions: INSTRUCTIONS,
   tools: allToolDefinitions,
   resources: allResourceDefinitions,
