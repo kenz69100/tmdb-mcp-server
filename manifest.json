@@ -5,9 +5,9 @@
   "version": "0.1.2",
   "description": "Search movies, TV, and people on The Movie Database (TMDB) — credits, ratings, trailers, images, recommendations, and region-aware streaming availability via MCP. STDIO or Streamable HTTP.",
   "author": {
-    "name": "Casey Hand",
+    "name": "cyanheads",
     "email": "casey@caseyjhand.com",
-    "url": "https://caseyjhand.com"
+    "url": "https://github.com/cyanheads"
   },
   "repository": { "type": "git", "url": "https://github.com/cyanheads/tmdb-mcp-server" },
   "homepage": "https://github.com/cyanheads/tmdb-mcp-server",

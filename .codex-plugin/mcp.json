@@ -3,8 +3,8 @@
     "command": "npx",
     "args": ["-y", "@cyanheads/tmdb-mcp-server"],
     "env": {
-      "MCP_TRANSPORT_TYPE": "stdio",
-      "TMDB_API_KEY": "${TMDB_API_KEY}"
-    }
+      "MCP_TRANSPORT_TYPE": "stdio"
+    },
+    "env_vars": ["TMDB_API_KEY"]
   }
 }
