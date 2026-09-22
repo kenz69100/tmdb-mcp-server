@@ -17,7 +17,7 @@ COPY package.json bun.lock ./
 
 # Install all dependencies (including dev dependencies for building).
 # The BuildKit cache mount persists Bun's global package cache across builds.
-RUN --mount=type=cache,target=/root/.bun/install/cache \
+RUN --mount=type=cache,id=tmdb-bun-cache,target=/root/.bun/install/cache \
     bun install --frozen-lockfile --ignore-scripts
 
 # Copy the rest of the source code
@@ -60,14 +60,14 @@ COPY package.json bun.lock ./
 # actually imports belongs in its own `dependencies`, so nothing needed at
 # runtime is lost. The OTEL step below carries the same flag — without it, that
 # install re-resolves the graph and pulls every optional peer back in.
-RUN --mount=type=cache,target=/root/.bun/install/cache \
+RUN  \
     bun install --production --omit=peer --frozen-lockfile --ignore-scripts
 
 # Conditionally install OpenTelemetry optional peer dependencies (Tier 3).
 # These are not bundled by default to keep the base image lean. Enable at build time
 # with: docker build --build-arg OTEL_ENABLED=true
 ARG OTEL_ENABLED=true
-RUN --mount=type=cache,target=/root/.bun/install/cache \
+RUN --mount=type=cache,id=tmdb-bun-cache,target=/root/.bun/install/cache \
     if [ "$OTEL_ENABLED" = "true" ]; then \
       bun add --omit=dev --omit=peer --ignore-scripts @hono/otel \
         @opentelemetry/instrumentation-http \
