@@ -17,8 +17,7 @@ COPY package.json bun.lock ./
 
 # Install all dependencies (including dev dependencies for building).
 # The BuildKit cache mount persists Bun's global package cache across builds.
-RUN bun install --frozen-lockfile \
-    bun install --frozen-lockfile --ignore-scripts
+RUN bun install --frozen-lockfile --ignore-scripts
 
 # Copy the rest of the source code
 COPY . .
@@ -67,8 +66,7 @@ RUN  \
 # These are not bundled by default to keep the base image lean. Enable at build time
 # with: docker build --build-arg OTEL_ENABLED=true
 ARG OTEL_ENABLED=true
-RUN bun install --frozen-lockfile \
-    if [ "$OTEL_ENABLED" = "true" ]; then \
+RUN if [ "$OTEL_ENABLED" = "true" ]; then \
       bun add --omit=dev --omit=peer --ignore-scripts @hono/otel \
         @opentelemetry/instrumentation-http \
         @opentelemetry/exporter-metrics-otlp-http \
