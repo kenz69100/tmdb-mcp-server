@@ -8,17 +8,10 @@
 
 import { createApp } from '@cyanheads/mcp-ts-core';
 import { requestContextService } from '@cyanheads/mcp-ts-core/utils';
+import { INSTRUCTIONS } from './instructions.js';
 import { allResourceDefinitions } from './mcp-server/resources/definitions/index.js';
 import { allToolDefinitions } from './mcp-server/tools/definitions/index.js';
 import { initTmdbService } from './services/tmdb/tmdb-service.js';
-
-const INSTRUCTIONS =
-  'Use the tmdb_* tools for film/TV/person data via TMDB. TMDB keys on integer ids — start with ' +
-  'tmdb_search_titles to resolve a name to an id, then tmdb_get_movie / tmdb_get_show / tmdb_get_person. ' +
-  'tmdb_discover_titles is the power-query for filtered browsing (genre, year, rating, sort); ' +
-  'tmdb_get_trending for what is hot. Streaming availability (tmdb_get_watch_providers) is region-specific — ' +
-  'pass a country code; results never imply global availability. Image fields are returned as full URLs. ' +
-  'This product uses the TMDB API but is not endorsed or certified by TMDB.';
 
 /** Lifecycle handle for embedders and integration tests; running as a CLI ignores it. */
 export const app = await createApp({
