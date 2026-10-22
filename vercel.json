@@ -11,5 +11,8 @@
       "includeFiles": "dist/**"
     }
   },
-  "rewrites": [{ "source": "/:path*", "destination": "/api?__path=:path*" }]
+  "rewrites": [
+    { "source": "/", "destination": "/api" },
+    { "source": "/:path*", "destination": "/api?__path=:path*" }
+  ]
 }
